@@ -7,6 +7,7 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <chrono>
 
 #define GLEW_STATIC
 #include <GL/glew.h>;
@@ -112,32 +113,31 @@ int main()
     glDeleteShader(fshader);
 
     glUseProgram(program);
+    glUniform1f(glGetUniformLocation(program, "window_width"), window_width); //time uniform
     //--------------------------------------------
 
     //VAO STUFF ----------------------------------
-    int width = 400, height = 400;
+    int width = 400, height = 200;
+    glUniform1f(glGetUniformLocation(program, "water_height"), height); //time uniform
 
     std::vector<float> verts; //3 floats per vertex (x, y, wave)
     //The wave float determines if the given vertex should oscillate in the vertex shader.
 
     //populate with vertex data for water, creates (N-1) partitions.
-    int N = 10;
+    int N = 50;
     for (int i = 0; i < N; i++)
     {
         //TOP VERTEX
         //Start at the left edge of the water, then add each partition (width/numOfpartitions) each iteration.)
         verts.push_back( (float)(window_width - width) / 2 + i * ( (float)width / (N - 1) ) ); //x
         verts.push_back( (float)(window_height + height) / 2 ); //y
-        verts.push_back((i % 2) ? 1 : 0); //If vertex is ontop of the water, then give it a wave float.
+        verts.push_back(1); //Top vert will always be a wave.
 
         //BOTTOM VERTEX
         verts.push_back( (float)(window_width - width) / 2 + i * ( (float)width / (N - 1)) ); //x
         verts.push_back((float)(window_height - height) / 2); //y
         verts.push_back(0); //wave will always be 0 on the bottom.
     }
-
-    for (int i = 0; i < verts.size(); i++)
-        std::cout << verts[i] << std::endl;
     
     GLuint vao, vbo;
     glCreateVertexArrays(1, &vao);
@@ -151,7 +151,6 @@ int main()
     glEnableVertexAttribArray(1);
 
     glm::mat4 projection = glm::ortho(0.0f, (float)window_width, 0.0f, (float)window_height, -0.1f, -100.0f);
-
     //--------------------------------------------
 
     //Imgui context stuff
@@ -179,18 +178,26 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        static float height = 0.0f;
+        static float translate_y = 0.0f, wave_speed = 3.5f;
+        static float disturbance = 1.0f, wave_height = 8.78f;
             
-        ImGui::Begin("Water editor.");                          // Create a window called "Hello, world!" and append into it.
-        ImGui::SliderFloat("height", &height, -500, 500);            // Edit 1 float using a slider from 0.0f to 1.0f
+        ImGui::Begin("Water editor.");
+        ImGui::SliderFloat("Translate_Y", &translate_y, -500, 500);
+        ImGui::SliderFloat("wave_speed", &wave_speed, 0, 15.0f);
+        ImGui::SliderFloat("wave_height", &wave_height, 0, 50.0f);
+        ImGui::SliderFloat("wave_disturbance", &disturbance, 0, 10.0f);
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::End();
 
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, height, 0.0f));
+        model = glm::translate(model, glm::vec3(0.0f, translate_y, 0.0f));
         glm::mat4 mvp = projection*model;
-        glUniformMatrix4fv(glGetUniformLocation(program, "mvp"), 1, GL_FALSE, &mvp[0][0]);
+
+        glUniformMatrix4fv(glGetUniformLocation(program, "mvp"), 1, GL_FALSE, &mvp[0][0]); //mvp uniform
+        glUniform1f(glGetUniformLocation(program, "time"), (float)(glfwGetTime() * wave_speed)); //time uniform
+        glUniform1f(glGetUniformLocation(program, "disturbance"), disturbance); //time uniform
+        glUniform1f(glGetUniformLocation(program, "wave_height"), wave_height); //time uniform
         glDrawArrays(GL_TRIANGLE_STRIP, 0, verts.size()/3); //since 3 floats per vertex.
 
         // Rendering
