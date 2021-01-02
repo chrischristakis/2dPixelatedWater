@@ -1,6 +1,12 @@
 ﻿  Main.cpp
-C:\Users\chris\_dev\cpp\repos\WaterEffect\src\Main.cpp(11,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-C:\Users\chris\_dev\cpp\repos\WaterEffect\src\Main.cpp(65,36): warning C4101: 'e': unreferenced local variable
+C:\Users\chris\_dev\cpp\repos\WaterEffect\src\Main.cpp(12,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\chris\_dev\cpp\repos\WaterEffect\src\Main.cpp(131,28): warning C4244: 'argument': conversion from 'int' to '_Ty', possible loss of data
+          with
+          [
+              _Ty=float
+          ]
+C:\Users\chris\_dev\cpp\repos\WaterEffect\src\Main.cpp(139,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\chris\_dev\cpp\repos\WaterEffect\src\Main.cpp(66,36): warning C4101: 'e': unreferenced local variable
 LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
 LINK : warning LNK4217: symbol '___glewActiveTexture' defined in 'glew32s.lib(glew.obj)' is imported by 'imgui_impl_opengl3.obj' in function '"void __cdecl ImGui_ImplOpenGL3_RenderDrawData(struct ImDrawData *)" (?ImGui_ImplOpenGL3_RenderDrawData@@YAXPAUImDrawData@@@Z)'

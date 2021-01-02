@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <vector>
 
 #define GLEW_STATIC
 #include <GL/glew.h>;
@@ -115,24 +116,39 @@ int main()
 
     //VAO STUFF ----------------------------------
     int width = 400, height = 400;
-    float verts[] = {
-         (float)(window_width - width) / 2, (float)(window_height - height) / 2, //bl
-         (float)(window_width + width) / 2, (float)(window_height - height) / 2, //br
-         (float)(window_width - width) / 2, (float)(window_height + height) / 2, //tl
 
-         (float)(window_width - width) / 2, (float)(window_height + height) / 2, //tl
-         (float)(window_width + width) / 2, (float)(window_height - height) / 2, //br
-         (float)(window_width + width) / 2, (float)(window_height + height) / 2, //tr
-    };
+    std::vector<float> verts; //3 floats per vertex (x, y, wave)
+    //The wave float determines if the given vertex should oscillate in the vertex shader.
 
+    //populate with vertex data for water, creates (N-1) partitions.
+    int N = 10;
+    for (int i = 0; i < N; i++)
+    {
+        //TOP VERTEX
+        //Start at the left edge of the water, then add each partition (width/numOfpartitions) each iteration.)
+        verts.push_back( (float)(window_width - width) / 2 + i * ( (float)width / (N - 1) ) ); //x
+        verts.push_back( (float)(window_height + height) / 2 ); //y
+        verts.push_back((i % 2) ? 1 : 0); //If vertex is ontop of the water, then give it a wave float.
+
+        //BOTTOM VERTEX
+        verts.push_back( (float)(window_width - width) / 2 + i * ( (float)width / (N - 1)) ); //x
+        verts.push_back((float)(window_height - height) / 2); //y
+        verts.push_back(0); //wave will always be 0 on the bottom.
+    }
+
+    for (int i = 0; i < verts.size(); i++)
+        std::cout << verts[i] << std::endl;
+    
     GLuint vao, vbo;
     glCreateVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glCreateBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glBufferData(GL_ARRAY_BUFFER, verts.size()*sizeof(float), &verts[0], GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)(2*sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     glm::mat4 projection = glm::ortho(0.0f, (float)window_width, 0.0f, (float)window_height, -0.1f, -100.0f);
 
@@ -153,6 +169,7 @@ int main()
 
     glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
     glm::mat4 model = glm::mat4(1.0f);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -174,7 +191,7 @@ int main()
         model = glm::translate(model, glm::vec3(0.0f, height, 0.0f));
         glm::mat4 mvp = projection*model;
         glUniformMatrix4fv(glGetUniformLocation(program, "mvp"), 1, GL_FALSE, &mvp[0][0]);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, verts.size()/3); //since 3 floats per vertex.
 
         // Rendering
         ImGui::Render();
