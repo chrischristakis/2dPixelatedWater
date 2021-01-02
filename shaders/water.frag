@@ -5,5 +5,5 @@ uniform vec3 aCol = vec3(33.0f/255, 179.0f/255, 251.0/255);
 
 void main()
 {
-	fragCol = vec4(aCol, 1.0);
+	fragCol = vec4(gl_FragCoord.y/800.0f, 0.0, 0.0, 1.0);
 }

@@ -149,17 +149,36 @@ int main()
     // Setup Platform/Renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
+    bool show_another_window = true;
 
     glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
+    glm::mat4 model = glm::mat4(1.0f);
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT);
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
 
-        glUniformMatrix4fv(glGetUniformLocation(program, "mvp"), 1, GL_FALSE, &projection[0][0]);
+        static float height = 0.0f;
+            
+        ImGui::Begin("Water editor.");                          // Create a window called "Hello, world!" and append into it.
+        ImGui::SliderFloat("height", &height, -500, 500);            // Edit 1 float using a slider from 0.0f to 1.0f
+
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::End();
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, height, 0.0f));
+        glm::mat4 mvp = projection*model;
+        glUniformMatrix4fv(glGetUniformLocation(program, "mvp"), 1, GL_FALSE, &mvp[0][0]);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         // Rendering
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
     }
 
