@@ -1,0 +1,4 @@
+﻿  Main.cpp
+C:\Users\chris\_dev\cpp\repos\WaterEffect\src\Main.cpp(11,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\chris\_dev\cpp\repos\WaterEffect\src\Main.cpp(65,36): warning C4101: 'e': unreferenced local variable
+  WaterEffect.vcxproj -> C:\Users\chris\_dev\cpp\repos\WaterEffect\bin\Win32\Debug\WaterEffect.exe
