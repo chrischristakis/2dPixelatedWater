@@ -16,6 +16,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 static const int window_width = 800, window_height = 800;
+static const int texture_width = 100, texture_height = 100; //for the downscaling of the water
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -100,7 +101,7 @@ int main()
     glGenTextures(1, &renderTex);
     glBindTexture(GL_TEXTURE_2D, renderTex);
     //Create an empty image (hence the 0 at the end where data should be.)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_width, window_height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture_width, texture_height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
@@ -169,6 +170,7 @@ int main()
         static float disturbance = 1.0f, wave_height = 8.78f;
         static bool wireframe = false;
             
+        //Thank you ImGui, you're amazing.
         ImGui::Begin("Water editor.");
         ImGui::SliderFloat("Translate_Y", &translate_y, -500, 500);
         ImGui::SliderFloat("wave_speed", &wave_speed, 0, 15.0f);
@@ -186,11 +188,11 @@ int main()
         if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        //draw to the framebuffer
+        //DRAW TO TEXTURE
         glBindFramebuffer(GL_FRAMEBUFFER, fbo); //Starting from now, render everything into the framebuffer
+        glViewport(0, 0, texture_width, texture_height); //Honestly, a little stumped here, mostly found through trial and error. just not sure why it had to be the size of the texture.
         glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT); //clear this framebuffer's color buffer.
-        glViewport(0, 0, window_width, window_height); //render the entire screen to the framebuffer.
         glBindVertexArray(vao);
         glUseProgram(program);
         glUniformMatrix4fv(glGetUniformLocation(program, "mvp"), 1, GL_FALSE, &mvp[0][0]); //mvp uniform
@@ -199,7 +201,9 @@ int main()
         glUniform1f(glGetUniformLocation(program, "wave_height"), wave_height);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, verts.size()/3); //since 3 floats per vertex.
 
+        //DEFAULT FRAMEBUFFER
         glBindFramebuffer(GL_FRAMEBUFFER, 0); //revert back to the default
+        glViewport(0, 0, window_width, window_height);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT); //Dont forget to clear the default framebuffer's color buffer.
         glUseProgram(screen_program);
