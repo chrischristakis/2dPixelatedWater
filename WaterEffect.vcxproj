@@ -28,6 +28,8 @@
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\screen.frag" />
+    <None Include="shaders\screen.vert" />
     <None Include="shaders\water.frag" />
     <None Include="shaders\water.vert" />
   </ItemGroup>
